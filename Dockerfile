@@ -1,13 +1,11 @@
-FROM jrottenberg/ffmpeg:6.1-alpine
+FROM python:3.11-alpine
 
-# 🔥 MATA el entrypoint original
-ENTRYPOINT []
-
-RUN apk add --no-cache python3 py3-flask
+RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 COPY app.py /app/app.py
 
-EXPOSE 8080
+RUN pip install flask
 
-CMD ["python3", "/app/app.py"]
+EXPOSE 8080
+CMD ["python", "app.py"]
