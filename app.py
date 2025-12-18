@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, send_file
 import subprocess
 import uuid
@@ -21,6 +22,9 @@ def convert():
 
     input_file.save(input_path)
 
+    if not os.path.exists(input_path):
+        return {"error": "Input file not saved"}, 500
+
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
@@ -34,17 +38,18 @@ def convert():
         "-c:a", "aac",
         "-b:a", "128k",
         "-movflags", "+faststart",
+        "-f", "mp4",
         output_path
     ]
 
-    subprocess.run(cmd, check=True)
-
-    return send_file(
-        output_path,
-        mimetype="video/mp4",
-        as_attachment=True,
-        download_name="compressed.mp4"
+    result = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
     )
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    if result.returncode != 0:
+        return {"error": "ffmpeg_failed", "details": result.stderr}, 500
+
+    return send_file(output_path, mimetype="video/mp4", as_attachment=True)
