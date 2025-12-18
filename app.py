@@ -1,9 +1,12 @@
 from flask import Flask, request, send_file
 import subprocess
-import os
 import uuid
 
 app = Flask(__name__)
+
+@app.route("/", methods=["GET"])
+def health():
+    return {"status": "ok"}, 200
 
 @app.route("/convert", methods=["POST"])
 def convert():
